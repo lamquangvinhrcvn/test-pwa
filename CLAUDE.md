@@ -61,3 +61,15 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ---
+
+## 5. Docker — Mọi lệnh package chạy trong container
+
+**Project này dùng Docker để dev.** Mọi thao tác cài đặt/cập nhật package đều phải chạy **bên trong container**, không chạy trực tiếp trên host.
+
+Luật:
+- `pnpm add <package>` → `docker compose exec nuxt pnpm add <package>`
+- `pnpm dlx ...` → `docker compose exec nuxt pnpm dlx ...`
+- `pnpm dev`, `pnpm build`, `pnpm preview` → đều qua `docker compose exec nuxt ...`
+- Nếu exec vào container rồi (`docker compose exec nuxt bash`) thì chạy lệnh bình thường trong shell đó.
+- Tuyệt đối không chạy `pnpm install`, `pnpm add` trên host — host không có node_modules.
+
