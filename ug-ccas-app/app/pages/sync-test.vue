@@ -1,4 +1,5 @@
 <script setup lang="ts">
+useHead({ title: 'Faeger-UG' })
 import { liveQuery } from 'dexie'
 import { db } from '~/composables/useDb'
 
