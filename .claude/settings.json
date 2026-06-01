@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "Read",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm:*)",
+      "Bash(docker compose exec nuxt:*)",
+      "Bash(docker compose:*)",
+      "Bash(mkdir:*)"
+    ]
+  }
+}
