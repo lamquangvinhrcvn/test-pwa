@@ -13,8 +13,9 @@
       "Bash(docker compose exec nuxt:*)",
       "Bash(docker compose:*)",
       "Bash(mkdir:*)",
-      "Skill(openspec-*)",
-      "Skill(opsx:*)"
+      "Skill(openspec*)",
+      "Skill(opsx:*)",
+      "Bash(openspec:*)"
     ]
   }
 }
