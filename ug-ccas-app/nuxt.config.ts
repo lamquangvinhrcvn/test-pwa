@@ -12,7 +12,6 @@ export default defineNuxtConfig({
   vite: {
     server: {
       watch: { usePolling: true },
-      hmr: { host: 'localhost', port: 24678 },
     },
   },
 
@@ -41,7 +40,7 @@ export default defineNuxtConfig({
       periodicSyncForUpdates: 3600,
     },
     devOptions: {
-      enabled: false,   // Đặt true khi muốn test SW trong dev
+      enabled: true,    // Bật SW trong dev để test install prompt
       type: 'module',
     },
   },

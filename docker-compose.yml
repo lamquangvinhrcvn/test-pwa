@@ -10,8 +10,7 @@ services:
     container_name: pwa-fager-ug
     working_dir: /app
     ports:
-      - "3000:3000"      # Nuxt dev server
-      - "24678:24678"    # Vite HMR websocket (nếu cần expose riêng)
+      - "59000:3000"      # Host 59000 → container 3000 (Nuxt dev/preview)
     volumes:
       - ./ug-ccas-app:/app                           # Source code từ host
       - pnpm_store:/home/node/.pnpm-store    # Cache pnpm (tăng tốc install)
@@ -22,7 +21,6 @@ services:
       - NODE_ENV=development
     stdin_open: true     # Cho phép tương tác khi exec
     tty: true
-    restart: unless-stopped
 
 volumes:
   pnpm_store:
