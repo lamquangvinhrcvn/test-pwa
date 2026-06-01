@@ -10,6 +10,11 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  ui: {
+    primary: 'primary',
+    neutral: 'neutral',
+  },
+
   // Cần thiết để Vite HMR hoạt động qua Docker
   vite: {
     server: {

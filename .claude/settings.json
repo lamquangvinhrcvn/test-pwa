@@ -12,7 +12,9 @@
       "Bash(pnpm:*)",
       "Bash(docker compose exec nuxt:*)",
       "Bash(docker compose:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Skill(openspec-*)",
+      "Skill(opsx:*)"
     ]
   }
 }
