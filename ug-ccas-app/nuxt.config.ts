@@ -18,16 +18,18 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'My Nuxt PWA',
-      short_name: 'NuxtPWA',
-      description: 'Nuxt 4 PWA',
+      name: 'Faeger-UG',
+      short_name: 'Faeger-UG',
+      description: 'Faeger-UG Progressive Web App',
       theme_color: '#18181b',
       background_color: '#ffffff',
       display: 'standalone',
       start_url: '/',
       icons: [
-        { src: '/pwa-icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/pwa-icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        { src: '/pwa-icons/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+        { src: '/pwa-icons/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pwa-icons/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/pwa-icons/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
       ],
     },
     workbox: {

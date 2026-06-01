@@ -1,4 +1,6 @@
 <script setup lang="ts">
+useHead({ title: 'Faeger-UG' })
+
 const { $pwa } = useNuxtApp()
 
 const isOnline = ref(true)
@@ -41,8 +43,8 @@ onMounted(() => {
 
 <template>
   <UContainer class="py-8">
-    <h1 class="text-3xl font-bold mb-2">Nuxt 4 PWA</h1>
-    <p class="text-gray-500 mb-6">@vite-pwa/nuxt + @nuxt/ui</p>
+    <h1 class="text-3xl font-bold mb-2">Faeger-UG</h1>
+    <p class="text-gray-500 mb-6">PWA — @vite-pwa/nuxt + @nuxt/ui</p>
 
     <!-- Debug PWA Status -->
     <UCard class="mb-6">
