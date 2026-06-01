@@ -8,6 +8,8 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
   ],
 
+  css: ['~/assets/css/main.css'],
+
   // Cần thiết để Vite HMR hoạt động qua Docker
   vite: {
     server: {
@@ -33,9 +35,21 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
+      globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,webp,woff2}'],
       navigateFallback: '/',
       cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          // Cache mọi navigation request (HTML page) — cốt lõi cho offline
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages-cache',
+            networkTimeoutSeconds: 3,
+            expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
+          },
+        },
+      ],
     },
     client: {
       installPrompt: true,

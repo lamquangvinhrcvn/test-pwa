@@ -69,7 +69,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 Luật:
 - `pnpm add <package>` → `docker compose exec nuxt pnpm add <package>`
 - `pnpm dlx ...` → `docker compose exec nuxt pnpm dlx ...`
-- `pnpm dev`, `pnpm build`, `pnpm preview` → đều qua `docker compose exec nuxt ...`
 - Nếu exec vào container rồi (`docker compose exec nuxt bash`) thì chạy lệnh bình thường trong shell đó.
 - Tuyệt đối không chạy `pnpm install`, `pnpm add` trên host — host không có node_modules.
+
+### Không chạy `pnpm build` / `pnpm preview`
+
+User tự start container và chạy `pnpm dev` ở local để test. **Không cần chạy `pnpm build` hoặc `pnpm preview`** — Claude không thực hiện các lệnh này.
 

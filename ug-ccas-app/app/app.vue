@@ -1,7 +1,9 @@
 <!-- app/app.vue -->
 <template>
-  <NuxtPwaAssets />
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <UApp>
+    <NuxtPwaAssets />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UApp>
 </template>

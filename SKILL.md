@@ -212,20 +212,14 @@ Khai báo types trong `tsconfig.json` (Nuxt tự thêm khi `pnpm prepare`):
 
 Type của `$pwa`: `PwaInjection` từ `@vite-pwa/nuxt`.
 
-## Build & Test
+## Test PWA
 
-```bash
-# Build production
-pnpm build
+User tự start container và chạy `pnpm dev` ở local để test PWA (bật `devOptions.enabled: true` nếu cần test Service Worker trong dev). **Không cần chạy `pnpm build` hoặc `pnpm preview`.**
 
-# Preview (SW chỉ chạy đầy đủ ở mode này, không phải dev)
-pnpm preview --host 0.0.0.0
-
-# Verify trong Chrome DevTools
-# → Application → Manifest (check manifest hợp lệ)
-# → Application → Service Workers (check SW active)
-# → Lighthouse → Run PWA audit (target ≥ 90)
-```
+Verify trong Chrome DevTools:
+→ Application → Manifest (check manifest hợp lệ)
+→ Application → Service Workers (check SW active)
+→ Lighthouse → Run PWA audit (target ≥ 90)
 
 ## Common pitfalls
 
