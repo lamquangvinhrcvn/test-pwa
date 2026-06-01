@@ -1,0 +1,28 @@
+# docker-compose.yml
+services:
+  nuxt:
+    build:
+      context: .
+      dockerfile: .docker/node/Dockerfile
+      args:
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    container_name: pwa-fager-ug
+    working_dir: /app
+    ports:
+      - "3000:3000"      # Nuxt dev server
+      - "24678:24678"    # Vite HMR websocket (nếu cần expose riêng)
+    volumes:
+      - ./ug-ccas-app:/app                           # Source code từ host
+      - pnpm_store:/home/node/.pnpm-store    # Cache pnpm (tăng tốc install)
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true             # Hot-reload ổn định trong Docker
+      - NODE_ENV=development
+    stdin_open: true     # Cho phép tương tác khi exec
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  pnpm_store:
