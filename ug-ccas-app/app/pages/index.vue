@@ -1,157 +1,113 @@
 <script setup lang="ts">
 useHead({ title: 'Faeger-UG' })
+import { liveQuery } from 'dexie'
+import { db } from '~/composables/useDb'
 
-const { $pwa } = useNuxtApp()
+const { addNote, syncPending, isSyncing, logs, isOnline } = useSyncQueue()
 
-const isOnline = ref(true)
-const isStandalone = ref(false)
-const swStatus = ref('đang kiểm tra...')
+const noteText = ref('')
+const notes = ref<any[]>([])
+
+const pendingCount = computed(() => notes.value.filter(n => n.syncStatus === 'pending').length)
+const syncedCount = computed(() => notes.value.filter(n => n.syncStatus === 'synced').length)
 
 onMounted(() => {
-  isOnline.value = navigator.onLine
-  window.addEventListener('online', () => (isOnline.value = true))
-  window.addEventListener('offline', () => (isOnline.value = false))
+  const subscription = liveQuery(() => db.notes.reverse().toArray())
+    .subscribe(data => { notes.value = data })
 
-  // Kiểm tra PWA standalone mode
-  isStandalone.value = window.matchMedia('(display-mode: standalone)').matches
-
-  // Kiểm tra Service Worker status
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      if (registrations.length === 0) {
-        swStatus.value = 'chưa đăng ký'
-      } else {
-        const sw = registrations[0]
-        if (sw.active) {
-          swStatus.value = `active (scope: ${sw.scope})`
-        } else if (sw.installing) {
-          swStatus.value = 'đang cài đặt...'
-        } else if (sw.waiting) {
-          swStatus.value = 'đang chờ kích hoạt'
-        } else {
-          swStatus.value = 'đã đăng ký'
-        }
-      }
-    }).catch(() => {
-      swStatus.value = 'lỗi truy cập SW'
-    })
-  } else {
-    swStatus.value = 'trình duyệt không hỗ trợ'
-  }
+  onUnmounted(() => subscription.unsubscribe())
 })
+
+const handleAdd = async () => {
+  if (!noteText.value.trim()) return
+  await addNote(noteText.value.trim())
+  noteText.value = ''
+}
+
+const clearAll = async () => {
+  await db.notes.clear()
+}
 </script>
 
 <template>
-  <UContainer class="py-8">
-    <h1 class="text-3xl font-bold mb-2">Faeger-UG</h1>
-    <p class="text-gray-500 mb-6">PWA — @vite-pwa/nuxt + @nuxt/ui</p>
+  <div class="p-6 max-w-2xl mx-auto">
+    <!-- Status bar -->
+    <div class="flex items-center gap-3 p-3 rounded-lg border mb-6">
+      <span :class="['w-3 h-3 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500']" />
+      <span class="font-medium">{{ isOnline ? 'Online' : 'Offline' }}</span>
+      <span class="text-sm text-gray-500 ml-auto">
+        {{ isOnline ? 'Kết nối bình thường' : 'Dữ liệu lưu local, sẽ sync khi có mạng' }}
+      </span>
+    </div>
 
-    <!-- Debug PWA Status -->
-    <UCard class="mb-6">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-info" />
-          <span>Trạng thái PWA</span>
-        </div>
-      </template>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Kết nối</span>
-          <UBadge :color="isOnline ? 'success' : 'error'" variant="subtle" class="ml-2">
-            {{ isOnline ? 'Online' : 'Offline' }}
-          </UBadge>
-        </div>
-
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Service Worker</span>
-          <UBadge
-            :color="swStatus.includes('active') ? 'success' : 'warning'"
-            variant="subtle"
-            class="ml-2"
-          >
-            {{ swStatus }}
-          </UBadge>
-        </div>
-
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Standalone</span>
-          <UBadge :color="isStandalone ? 'success' : 'neutral'" variant="subtle" class="ml-2">
-            {{ isStandalone ? 'Yes' : 'No' }}
-          </UBadge>
-        </div>
-
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Cài đặt được</span>
-          <UBadge
-            :color="$pwa?.showInstallPrompt && !$pwa?.isPWAInstalled ? 'success' : 'neutral'"
-            variant="subtle"
-            class="ml-2"
-          >
-            {{ $pwa?.showInstallPrompt ? 'Yes' : 'No (chưa trigger BIP)' }}
-          </UBadge>
-        </div>
-
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Đã cài PWA</span>
-          <UBadge :color="$pwa?.isPWAInstalled ? 'success' : 'neutral'" variant="subtle" class="ml-2">
-            {{ $pwa?.isPWAInstalled ? 'Yes' : 'No' }}
-          </UBadge>
-        </div>
-
-        <div>
-          <span class="text-xs text-gray-400 uppercase">Offline Ready</span>
-          <UBadge :color="$pwa?.offlineReady ? 'success' : 'neutral'" variant="subtle" class="ml-2">
-            {{ $pwa?.offlineReady ? 'Yes' : 'No' }}
-          </UBadge>
-        </div>
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="p-4 rounded-lg border text-center">
+        <div class="text-3xl font-medium text-amber-600">{{ pendingCount }}</div>
+        <div class="text-sm text-gray-500 mt-1">Chờ đồng bộ</div>
       </div>
-    </UCard>
-
-    <!-- Install prompt -->
-    <UCard v-if="$pwa?.showInstallPrompt && !$pwa?.isPWAInstalled" class="mb-4" variant="soft">
-      <template #header>📲 Cài đặt App</template>
-      <p class="text-gray-600 mb-3">Cài app này lên màn hình chính để dùng offline.</p>
-      <UButton color="primary" size="lg" @click="$pwa?.install()">
-        Cài đặt lên màn hình chính
-      </UButton>
-    </UCard>
-
-    <!-- Update banner -->
-    <UCard v-if="$pwa?.needRefresh" class="mb-4" variant="soft">
-      <template #header>🔄 Có phiên bản mới</template>
-      <div class="flex gap-2">
-        <UButton color="primary" @click="$pwa?.updateServiceWorker()">
-          Cập nhật ngay
-        </UButton>
-        <UButton variant="ghost" @click="$pwa?.cancelPrompt()">
-          Để sau
-        </UButton>
+      <div class="p-4 rounded-lg border text-center">
+        <div class="text-3xl font-medium text-green-600">{{ syncedCount }}</div>
+        <div class="text-sm text-gray-500 mt-1">Đã đồng bộ</div>
       </div>
-    </UCard>
+    </div>
 
-    <!-- Offline ready -->
-    <UCard v-if="$pwa?.offlineReady" class="mb-4" variant="soft">
-      <template #header>✅ Offline Ready</template>
-      <p class="text-gray-600">App đã cache xong, sẵn sàng dùng offline.</p>
-    </UCard>
+    <!-- Input -->
+    <div class="flex gap-2 mb-4">
+      <input
+        v-model="noteText"
+        @keyup.enter="handleAdd"
+        placeholder="Nhập ghi chú..."
+        class="flex-1 px-3 py-2 border rounded-lg"
+      />
+      <button
+        @click="handleAdd"
+        class="px-4 py-2 bg-green-700 text-white rounded-lg"
+      >
+        Thêm
+      </button>
+      <button
+        @click="syncPending"
+        :disabled="!isOnline || isSyncing"
+        class="px-4 py-2 border rounded-lg disabled:opacity-40"
+      >
+        {{ isSyncing ? 'Đang sync...' : 'Sync' }}
+      </button>
+      <button
+        @click="clearAll"
+        class="px-4 py-2 border rounded-lg text-red-600"
+      >
+        Xoá
+      </button>
+    </div>
 
-    <!-- Test buttons -->
-    <UCard class="mb-6">
-      <template #header>Nuxt UI Components</template>
-      <div class="flex flex-wrap gap-2">
-        <UButton color="primary" size="lg">Primary</UButton>
-        <UButton color="secondary" variant="outline" size="lg">Secondary</UButton>
-        <UButton color="success" size="lg">Success</UButton>
-        <UButton color="error" variant="soft" size="lg">Error</UButton>
-        <UButton color="warning" size="lg">Warning</UButton>
-        <UButton color="info" variant="link" size="lg">Info Link</UButton>
+    <!-- List -->
+    <div class="flex flex-col gap-2 mb-4">
+      <div
+        v-for="note in notes"
+        :key="note.id"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg border bg-gray-50"
+      >
+        <span class="flex-1 text-sm">{{ note.text }}</span>
+        <span
+          :class="['text-xs px-2 py-1 rounded-full',
+            note.syncStatus === 'pending' ? 'bg-amber-100 text-amber-800' :
+            note.syncStatus === 'synced'  ? 'bg-green-100 text-green-800' :
+                                            'bg-red-100 text-red-800']"
+        >
+          {{ note.syncStatus }}
+        </span>
       </div>
-    </UCard>
 
-    <p class="text-xs text-gray-400">
-      PWA Service Worker: dev mode ({{ swStatus }}).
-      Để test PWA đầy đủ, chạy <code>pnpm build && pnpm preview</code>.
-    </p>
-  </UContainer>
+      <div v-if="notes.length === 0" class="text-sm text-gray-400 text-center py-6">
+        Chưa có dữ liệu nào
+      </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="bg-zinc-900 rounded-lg p-3 font-mono text-xs text-green-400 max-h-32 overflow-y-auto">
+      <div v-for="(l, i) in logs" :key="i">{{ l }}</div>
+      <div v-if="logs.length === 0" class="text-zinc-500">Chưa có log...</div>
+    </div>
+  </div>
 </template>
