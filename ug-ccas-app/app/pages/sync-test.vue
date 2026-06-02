@@ -31,6 +31,19 @@ const clearAll = async () => {
 
 <template>
   <div class="p-6 max-w-2xl mx-auto">
+    <!-- Back button -->
+    <div class="mb-4">
+      <UButton
+        variant="ghost"
+        color="neutral"
+        size="sm"
+        icon="i-lucide-arrow-left"
+        @click="navigateTo('/home')"
+      >
+        Back
+      </UButton>
+    </div>
+
     <!-- Status bar -->
     <div class="flex items-center gap-3 p-3 rounded-lg border mb-6">
       <span :class="['w-3 h-3 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500']" />

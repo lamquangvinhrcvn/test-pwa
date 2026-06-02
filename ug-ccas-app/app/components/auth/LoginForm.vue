@@ -13,7 +13,7 @@
     <div class="flex-1 px-4 mt-8">
       <div class="border border-neutral-200 rounded-2xl p-5">
         <h2 class="text-neutral-900 text-2xl font-bold">Sign in</h2>
-        <p class="text-neutral-500 text-sm mt-1">Monitor IDとパスワードを入力</p>
+        <p class="text-neutral-500 text-sm mt-1">Monitor ID</p>
 
         <form class="mt-6 space-y-5" @submit.prevent="onSubmit">
           <!-- Monitor ID -->
@@ -23,6 +23,7 @@
               v-model="monitorId"
               color="primary"
               size="lg"
+              :ui="{ base: 'px-3 py-3.5 text-base/5 gap-2' }"
               class="w-full"
             />
           </div>
@@ -35,6 +36,7 @@
               type="password"
               color="primary"
               size="lg"
+              :ui="{ base: 'px-3 py-3.5 text-base/5 gap-2' }"
               class="w-full"
             />
           </div>
@@ -53,8 +55,8 @@
 
         <div class="flex items-center justify-between mt-4">
           <UCheckbox v-model="rememberMe" label="Remember me" color="primary" size="sm" />
-          <UButton variant="ghost" color="primary" size="sm">
-            Forgot?
+          <UButton variant="ghost" color="primary" size="sm" @click="navigateTo('/sync-test')">
+            Sync online/offline
           </UButton>
         </div>
       </div>
@@ -70,7 +72,7 @@
 
 <script setup lang="ts">
 const monitorId = ref('MON-2417')
-const password = ref('')
+const password = ref('MON-2417')
 const rememberMe = ref(false)
 
 function onSubmit() {
