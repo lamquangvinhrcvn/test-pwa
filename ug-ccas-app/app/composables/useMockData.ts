@@ -21,7 +21,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10)
 
 function makeReadings(pipeId: string): DailyReading[] {
   const list: DailyReading[] = []
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 7; i++) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     const dateStr = fmt(d)

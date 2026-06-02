@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-blue-50 rounded-xl p-3 flex items-center justify-center gap-4">
+  <div class="bg-blue-100 rounded-xl p-3 flex items-center justify-between gap-4">
     <UButton
       icon="i-lucide-minus"
-      variant="ghost"
       color="neutral"
-      class="size-8"
+      variant="outline"
+      class="size-9 rounded-full border-blue-300 !text-blue-800 flex items-center justify-center"
       :disabled="modelValue <= min"
       @click="decrement"
     />
@@ -14,9 +14,9 @@
     </div>
     <UButton
       icon="i-lucide-plus"
-      variant="ghost"
       color="neutral"
-      class="size-8"
+      variant="outline"
+      class="size-9 rounded-full border-blue-300 !text-blue-800 flex items-center justify-center"
       :disabled="modelValue >= max"
       @click="increment"
     />
