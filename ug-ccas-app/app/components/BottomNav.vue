@@ -2,7 +2,7 @@
   <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-neutral-200 flex justify-around py-1 z-30">
     <UButton
       v-for="tab in tabs"
-      :key="tab.to"
+      :key="tab.label"
       :to="tab.to"
       variant="ghost"
       :color="isActive(tab.to) ? 'primary' : 'neutral'"
@@ -21,10 +21,11 @@ const tabs = [
   { to: '/home', icon: 'i-lucide-home', label: 'Home' },
   { to: '/fields', icon: 'i-lucide-layout-grid', label: 'Fields' },
   { to: '/monitor', icon: 'i-lucide-gauge', label: 'Monitor' },
-  { to: '/logbook', icon: 'i-lucide-book-open', label: 'Logbook' },
+  { icon: 'i-lucide-book-open', label: 'Logbook' },
 ]
 
-function isActive(path: string): boolean {
+function isActive(path?: string): boolean {
+  if (!path) return false
   return route.path.startsWith(path)
 }
 </script>

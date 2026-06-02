@@ -9,7 +9,7 @@
 
     <div
       v-if="!loaded && !error"
-      class="flex items-center justify-center w-full h-[300px] bg-primary-100 rounded-lg"
+      class="flex items-center justify-center w-full h-[250px] bg-primary-100 rounded-lg"
     >
       <div class="flex flex-col items-center gap-2">
         <UIcon name="i-lucide-loader-2" class="size-5 text-primary-500 animate-spin" />
@@ -19,14 +19,14 @@
 
     <div
       v-if="error"
-      class="flex items-center justify-center w-full h-[300px] bg-red-50 rounded-lg border border-red-200"
+      class="flex items-center justify-center w-full h-[250px] bg-red-50 rounded-lg border border-red-200"
     >
       <span class="text-red-500 text-xs">{{ error }}</span>
     </div>
 
     <div
       ref="mapEl"
-      class="w-full h-[300px] rounded-lg"
+      class="w-full h-[250px] rounded-lg"
       :class="{ hidden: !loaded }"
     />
   </div>

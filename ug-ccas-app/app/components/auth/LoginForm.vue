@@ -17,29 +17,27 @@
 
         <form class="mt-6 space-y-5" @submit.prevent="onSubmit">
           <!-- Monitor ID -->
-          <div>
-            <label class="block text-xs text-neutral-500 mb-1.5">Monitor ID</label>
+          <UFormField label="Monitor ID" :error="errors.monitorId ? errorMsg : undefined">
             <UInput
               v-model="monitorId"
-              color="primary"
               size="lg"
               :ui="{ base: 'px-3 py-3.5 text-base/5 gap-2' }"
               class="w-full"
+              @input="clearErrors"
             />
-          </div>
+          </UFormField>
 
           <!-- Password -->
-          <div>
-            <label class="block text-xs text-neutral-500 mb-1.5">Password</label>
+          <UFormField label="Password" :error="errors.password ? errorMsg : undefined">
             <UInput
               v-model="password"
               type="password"
-              color="primary"
               size="lg"
               :ui="{ base: 'px-3 py-3.5 text-base/5 gap-2' }"
               class="w-full"
+              @input="clearErrors"
             />
-          </div>
+          </UFormField>
 
           <UButton
             type="submit"
@@ -74,8 +72,37 @@
 const monitorId = ref('MON-2417')
 const password = ref('MON-2417')
 const rememberMe = ref(false)
+const errorMsg = ref<string | null>(null)
+const errors = reactive({ monitorId: false, password: false })
+
+function clearErrors() {
+  errorMsg.value = null
+  errors.monitorId = false
+  errors.password = false
+}
 
 function onSubmit() {
+  clearErrors()
+
+  if (!monitorId.value.trim() && !password.value.trim()) {
+    errorMsg.value = 'Please enter Monitor ID and password.'
+    errors.monitorId = true
+    errors.password = true
+    return
+  }
+
+  if (!monitorId.value.trim()) {
+    errorMsg.value = 'Please enter Monitor ID.'
+    errors.monitorId = true
+    return
+  }
+
+  if (!password.value.trim()) {
+    errorMsg.value = 'Please enter password.'
+    errors.password = true
+    return
+  }
+
   navigateTo('/home')
 }
 </script>

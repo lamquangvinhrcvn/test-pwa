@@ -3,7 +3,7 @@
     <!-- Loading skeleton -->
     <div
       v-if="!loaded && !error"
-      class="flex items-center justify-center w-full h-[350px] bg-primary-100 rounded-lg"
+      class="flex items-center justify-center w-full h-[250px] bg-primary-100 rounded-lg"
     >
       <div class="flex flex-col items-center gap-2">
         <UIcon name="i-lucide-loader-2" class="size-6 text-primary-500 animate-spin" />
@@ -14,7 +14,7 @@
     <!-- Error state -->
     <div
       v-if="error"
-      class="flex items-center justify-center w-full h-[350px] bg-red-50 rounded-lg border border-red-200"
+      class="flex items-center justify-center w-full h-[250px] bg-red-50 rounded-lg border border-red-200"
     >
       <div class="flex flex-col items-center gap-2 px-4">
         <UIcon name="i-lucide-triangle-alert" class="size-6 text-red-500" />
@@ -25,7 +25,7 @@
     <!-- Map container (hidden until loaded) -->
     <div
       ref="mapEl"
-      class="w-full h-[350px] rounded-lg"
+      class="w-full h-[250px] rounded-lg"
       :class="{ hidden: !loaded }"
     />
 
