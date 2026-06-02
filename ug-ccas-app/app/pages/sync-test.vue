@@ -3,7 +3,7 @@ useHead({ title: 'Faeger-UG' })
 import { liveQuery } from 'dexie'
 import { db } from '~/composables/useDb'
 
-const { addNote, syncPending, isSyncing, logs, isOnline } = useSyncQueue()
+const { addNote, syncPending, isSyncing, logs, isOnline, isInitialCheckDone } = useSyncQueue()
 
 const noteText = ref('')
 const notes = ref<any[]>([])
@@ -11,11 +11,17 @@ const notes = ref<any[]>([])
 const pendingCount = computed(() => notes.value.filter(n => n.syncStatus === 'pending').length)
 const syncedCount = computed(() => notes.value.filter(n => n.syncStatus === 'synced').length)
 
+// Chỉ load cache sau khi ping xong, biết chính xác online/offline
 onMounted(() => {
-  const subscription = liveQuery(() => db.notes.reverse().toArray())
-    .subscribe(data => { notes.value = data })
+  const stopWatch = watch(isInitialCheckDone, (done) => {
+    if (done) {
+      const subscription = liveQuery(() => db.notes.reverse().toArray())
+        .subscribe(data => { notes.value = data })
 
-  onUnmounted(() => subscription.unsubscribe())
+      onUnmounted(() => subscription.unsubscribe())
+      stopWatch()
+    }
+  }, { immediate: true })
 })
 
 const handleAdd = async () => {
@@ -46,11 +52,17 @@ const clearAll = async () => {
 
     <!-- Status bar -->
     <div class="flex items-center gap-3 p-3 rounded-lg border mb-6">
-      <span :class="['w-3 h-3 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500']" />
-      <span class="font-medium">{{ isOnline ? 'Online' : 'Offline' }}</span>
-      <span class="text-sm text-gray-500 ml-auto">
-        {{ isOnline ? 'Kết nối bình thường' : 'Dữ liệu lưu local, sẽ sync khi có mạng' }}
-      </span>
+      <template v-if="!isInitialCheckDone">
+        <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-amber-500" />
+        <span class="font-medium text-gray-500">Đang kiểm tra kết nối...</span>
+      </template>
+      <template v-else>
+        <span :class="['w-3 h-3 rounded-full', isOnline ? 'bg-green-500' : 'bg-red-500']" />
+        <span class="font-medium">{{ isOnline ? 'Online' : 'Offline' }}</span>
+        <span class="text-sm text-gray-500 ml-auto">
+          {{ isOnline ? 'Kết nối bình thường' : 'Dữ liệu lưu local, sẽ sync khi có mạng' }}
+        </span>
+      </template>
     </div>
 
     <!-- Stats -->
@@ -81,7 +93,7 @@ const clearAll = async () => {
       </button>
       <button
         @click="syncPending"
-        :disabled="!isOnline || isSyncing"
+        :disabled="!isInitialCheckDone || !isOnline || isSyncing"
         class="px-4 py-2 border rounded-lg disabled:opacity-40"
       >
         {{ isSyncing ? 'Đang sync...' : 'Sync' }}

@@ -1,6 +1,9 @@
 export const useOnlineStatus = () => {
   const isOnline = ref(import.meta.client ? navigator.onLine : true)
   const isChecking = ref(false)
+  const isInitialCheckDone = ref(false)
+
+  let _initialCheckDone = false
 
   // Active network check — thực sự gửi request để kiểm tra internet
   // navigator.onLine chỉ biết thiết bị có kết nối mạng (WiFi) hay không,
@@ -13,9 +16,7 @@ export const useOnlineStatus = () => {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-      // Fetch endpoint NetworkOnly — SW không cache endpoint này,
-      // nên nếu không có internet thật, request sẽ fail.
-      // Dùng cache-busting param để tránh browser HTTP cache.
+      // Tương lai sẽ ping vào API thực tế.
       await fetch(`/__health?_t=${Date.now()}`, {
         method: 'HEAD',
         cache: 'no-store',
@@ -28,6 +29,10 @@ export const useOnlineStatus = () => {
       isOnline.value = false
     } finally {
       isChecking.value = false
+      if (!_initialCheckDone) {
+        _initialCheckDone = true
+        isInitialCheckDone.value = true
+      }
     }
   }
 
@@ -60,5 +65,5 @@ export const useOnlineStatus = () => {
     })
   }
 
-  return { isOnline, isChecking, checkNetwork }
+  return { isOnline, isChecking, isInitialCheckDone, checkNetwork }
 }

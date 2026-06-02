@@ -7,7 +7,8 @@
     <!-- Status row -->
     <div class="flex items-center justify-between px-4 py-2.5">
       <span class="text-neutral-900 text-sm font-semibold">Today's readings</span>
-      <OfflineBadge :is-offline="isOffline" />
+      <OfflineBadge v-if="isInitialCheckDone" :is-offline="isOffline" />
+      <span v-else class="text-xs text-gray-400">Đang kiểm tra...</span>
     </div>
 
     <USeparator />
@@ -48,7 +49,10 @@ definePageMeta({
   layout: 'default',
 })
 
-const { pipes, isOffline, addReading, getPipeContext } = useMockData()
+const { pipes, addReading, getPipeContext } = useMockData()
+const { isOnline, isInitialCheckDone } = useOnlineStatus()
+
+const isOffline = computed(() => !isOnline.value)
 
 const dialogOpen = ref(false)
 const dialogPipe = ref<PipeContext | null>(null)

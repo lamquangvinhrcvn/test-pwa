@@ -1,7 +1,7 @@
 import { db } from './useDb'
 
 export const useSyncQueue = () => {
-  const { isOnline } = useOnlineStatus()
+  const { isOnline, isChecking, isInitialCheckDone } = useOnlineStatus()
   const isSyncing = ref(false)
   const logs = ref<string[]>([])
 
@@ -48,5 +48,5 @@ export const useSyncQueue = () => {
     }
   }
 
-  return { addNote, syncPending, isSyncing, logs, isOnline }
+  return { addNote, syncPending, isSyncing, logs, isOnline, isChecking, isInitialCheckDone }
 }
