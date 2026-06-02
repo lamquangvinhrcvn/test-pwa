@@ -1,6 +1,14 @@
 <template>
   <div>
     <AppHeader>
+      <template #back>
+        <UButton
+          icon="i-lucide-log-out"
+          variant="ghost"
+          class="text-white"
+          @click="navigateTo('/')"
+        />
+      </template>
       <template #title>Home</template>
     </AppHeader>
 

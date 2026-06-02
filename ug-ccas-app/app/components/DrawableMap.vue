@@ -6,98 +6,136 @@
         Reset
       </UButton>
     </div>
-    <svg
-      ref="svgEl"
-      viewBox="0 0 300 200"
-      preserveAspectRatio="none"
-      class="block w-full h-[300px] fill-primary-100"
-      @click="onSvgClick"
+
+    <div
+      v-if="!loaded && !error"
+      class="flex items-center justify-center w-full h-[300px] bg-primary-100 rounded-lg"
     >
-      <rect width="300" height="200" class="fill-primary-100" />
+      <div class="flex flex-col items-center gap-2">
+        <UIcon name="i-lucide-loader-2" class="size-5 text-primary-500 animate-spin" />
+        <span class="text-primary-500 text-xs">Loading map...</span>
+      </div>
+    </div>
 
-      <!-- Polygon preview -->
-      <polygon
-        v-if="points.length >= 3"
-        :points="pointsString"
-        class="fill-primary-200/50 stroke-primary-300"
-        stroke-width="1.5"
-        stroke-dasharray="6,3"
-      />
+    <div
+      v-if="error"
+      class="flex items-center justify-center w-full h-[300px] bg-red-50 rounded-lg border border-red-200"
+    >
+      <span class="text-red-500 text-xs">{{ error }}</span>
+    </div>
 
-      <!-- Corner handles -->
-      <circle
-        v-for="(pt, i) in points"
-        :key="i"
-        :cx="pt.x"
-        :cy="pt.y"
-        r="7"
-        class="fill-white stroke-primary-300 cursor-pointer"
-        stroke-width="2"
-        @mousedown.prevent="onDragStart(i, $event)"
-        @touchstart.prevent="onDragStart(i, $event)"
-      />
-    </svg>
+    <div
+      ref="mapEl"
+      class="w-full h-[300px] rounded-lg"
+      :class="{ hidden: !loaded }"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Point } from '~/types'
+import type { LatLng } from '~/utils/mapCoords'
 
-const points = ref<Point[]>([])
-const svgEl = ref<SVGSVGElement | null>(null)
-const draggingIndex = ref<number | null>(null)
+const points = ref<LatLng[]>([])
+const mapEl = ref<HTMLDivElement | null>(null)
+const loaded = ref(false)
+const error = ref<string | null>(null)
 
-const pointsString = computed(() =>
-  points.value.map(p => `${p.x},${p.y}`).join(' ')
-)
+let map: google.maps.Map | null = null
+let polygonOverlay: google.maps.Polygon | null = null
+const pointMarkers: google.maps.Marker[] = []
 
 defineExpose({ points })
 
-function screenToSvg(clientX: number, clientY: number): Point | null {
-  const svg = svgEl.value
-  if (!svg) return null
-  const pt = svg.createSVGPoint()
-  pt.x = clientX
-  pt.y = clientY
-  const ctm = svg.getScreenCTM()
-  if (!ctm) return null
-  const svgPt = pt.matrixTransform(ctm.inverse())
-  return { x: Math.round(svgPt.x), y: Math.round(svgPt.y) }
+const { loadGoogleMaps } = useGoogleMaps()
+
+function clearOverlays() {
+  if (polygonOverlay) { polygonOverlay.setMap(null); polygonOverlay = null }
+  for (const m of pointMarkers) m.setMap(null)
+  pointMarkers.length = 0
 }
 
-function onSvgClick(e: MouseEvent) {
-  // Ignore if we just finished dragging
-  if (draggingIndex.value !== null) return
-  const pt = screenToSvg(e.clientX, e.clientY)
-  if (pt) points.value.push(pt)
-}
+function redraw() {
+  if (!map) return
+  clearOverlays()
 
-function onDragStart(index: number, e: MouseEvent | TouchEvent) {
-  draggingIndex.value = index
-
-  const onMove = (ev: MouseEvent | TouchEvent) => {
-    if (draggingIndex.value === null) return
-    const clientX = 'touches' in ev ? ev.touches[0].clientX : ev.clientX
-    const clientY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY
-    const pt = screenToSvg(clientX, clientY)
-    if (pt) points.value[draggingIndex.value] = pt
+  // Draw polygon
+  if (points.value.length >= 3) {
+    polygonOverlay = new google.maps.Polygon({
+      paths: points.value,
+      strokeColor: '#2D5A27',
+      strokeWeight: 2,
+      fillColor: '#2D5A27',
+      fillOpacity: 0.25,
+      clickable: false,
+      strokeDasharray: [6, 3],
+    })
+    polygonOverlay.setMap(map)
   }
 
-  const onEnd = () => {
-    draggingIndex.value = null
-    window.removeEventListener('mousemove', onMove)
-    window.removeEventListener('mouseup', onEnd)
-    window.removeEventListener('touchmove', onMove)
-    window.removeEventListener('touchend', onEnd)
+  // Draw draggable markers for each point
+  for (let i = 0; i < points.value.length; i++) {
+    const marker = new google.maps.Marker({
+      position: points.value[i],
+      map,
+      draggable: true,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
+        strokeColor: '#2D5A27',
+        strokeWeight: 2,
+      },
+    })
+    marker.addListener('drag', (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) points.value[i] = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+    })
+    marker.addListener('dragend', () => {
+      // Trigger reactivity by replacing the array element
+      points.value = [...points.value]
+    })
+    pointMarkers.push(marker)
   }
-
-  window.addEventListener('mousemove', onMove)
-  window.addEventListener('mouseup', onEnd)
-  window.addEventListener('touchmove', onMove, { passive: false })
-  window.addEventListener('touchend', onEnd)
 }
+
+async function initMap() {
+  if (!import.meta.client) return
+  try {
+    await loadGoogleMaps()
+    if (!mapEl.value) return
+
+    map = new google.maps.Map(mapEl.value, {
+      center: { lat: 14.0, lng: 108.0 },
+      zoom: 17,
+      mapTypeId: 'satellite',
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: true,
+    })
+
+    map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return
+      points.value = [...points.value, { lat: e.latLng.lat(), lng: e.latLng.lng() }]
+      redraw()
+    })
+
+    loaded.value = true
+  } catch (e: unknown) {
+    error.value = 'Failed to load map'
+  }
+}
+
+watch(points, () => redraw(), { deep: true })
 
 function resetPoints() {
   points.value = []
+  if (map) map.setCenter({ lat: 14.0, lng: 108.0 })
 }
+
+onMounted(() => initMap())
+onUnmounted(() => {
+  clearOverlays()
+  map = null
+})
 </script>

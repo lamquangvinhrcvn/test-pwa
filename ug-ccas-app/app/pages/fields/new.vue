@@ -32,7 +32,7 @@
           color="primary"
           size="xl"
           class="w-full"
-          :ui="{ input: 'h-16' }"
+          :ui="{ base: 'px-3 py-3.5 text-base gap-2' }"
           placeholder="e.g. Field D"
         />
       </div>
@@ -44,7 +44,7 @@
           color="primary"
           size="xl"
           class="w-full"
-          :ui="{ input: 'h-16' }"
+          :ui="{ base: 'px-3 py-3.5 text-base gap-2' }"
           placeholder="Optional note..."
         />
       </div>
@@ -70,13 +70,14 @@
 </template>
 
 <script setup lang="ts">
-import { polygonArea, pixelToHa } from '~/utils/geometry'
+import { polygonArea, toHa } from '~/utils/geometry'
+import type { LatLng } from '~/utils/mapCoords'
 
 definePageMeta({
   layout: 'default',
 })
 
-const drawableMapRef = ref<{ points: { x: number; y: number }[] } | null>(null)
+const drawableMapRef = ref<{ points: LatLng[] } | null>(null)
 const fieldName = ref('')
 const fieldNote = ref('')
 
@@ -84,7 +85,7 @@ const points = computed(() => drawableMapRef.value?.points ?? [])
 
 const calculatedArea = computed(() => {
   if (points.value.length < 3) return 0
-  return pixelToHa(polygonArea(points.value))
+  return toHa(polygonArea(points.value))
 })
 
 const formattedArea = computed(() => calculatedArea.value.toFixed(2))

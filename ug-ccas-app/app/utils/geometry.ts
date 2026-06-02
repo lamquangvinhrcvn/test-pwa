@@ -1,26 +1,48 @@
-import type { Point } from '~/types'
+import type { LatLng } from '~/utils/mapCoords'
+
+const METERS_PER_DEG_LAT = 111_320
+
+function metersPerDegLng(lat: number): number {
+  return METERS_PER_DEG_LAT * Math.cos((lat * Math.PI) / 180)
+}
+
+function centroid(points: LatLng[]): LatLng {
+  let sumLat = 0, sumLng = 0
+  for (const p of points) { sumLat += p.lat; sumLng += p.lng }
+  return { lat: sumLat / points.length, lng: sumLng / points.length }
+}
 
 /**
- * Shoelace formula — tính diện tích polygon từ tọa độ (px²).
- * Kết quả luôn dương, không phụ thuộc vào chiều (CW/CCW).
+ * Convert LatLng points to local meter coordinates relative to the centroid.
  */
-export function polygonArea(pts: Point[]): number {
-  if (pts.length < 3) return 0
+function toMeters(points: LatLng[]): { x: number; y: number }[] {
+  const c = centroid(points)
+  const mpdLng = metersPerDegLng(c.lat)
+  return points.map(p => ({
+    x: (p.lng - c.lng) * mpdLng,
+    y: (p.lat - c.lat) * METERS_PER_DEG_LAT,
+  }))
+}
+
+/**
+ * Calculate polygon area in m² using the shoelace formula on meter-projected coordinates.
+ * Returns 0 for fewer than 3 points.
+ */
+export function polygonArea(points: LatLng[]): number {
+  if (points.length < 3) return 0
+  const m = toMeters(points)
   let area = 0
-  for (let i = 0; i < pts.length; i++) {
-    const j = (i + 1) % pts.length
-    area += pts[i].x * pts[j].y
-    area -= pts[j].x * pts[i].y
+  for (let i = 0; i < m.length; i++) {
+    const j = (i + 1) % m.length
+    area += m[i].x * m[j].y
+    area -= m[j].x * m[i].y
   }
   return Math.abs(area) / 2
 }
 
-/** Hằng số scale tạm: 1 px² = 0.01 ha (cho mock data) */
-const PX2_PER_HA = 0.01
-
 /**
- * Chuyển đổi pixel² → hectares dùng scale factor.
+ * Convert square meters to hectares.
  */
-export function pixelToHa(pxArea: number): number {
-  return pxArea * PX2_PER_HA
+export function toHa(sqMeters: number): number {
+  return sqMeters / 10_000
 }

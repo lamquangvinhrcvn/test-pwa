@@ -51,13 +51,20 @@
 </template>
 
 <script setup lang="ts">
-import type { Point } from '~/types'
+import { pixelPolygonToLatLng, type LatLng } from '~/utils/mapCoords'
 
 definePageMeta({
   layout: 'default',
 })
 
 const route = useRoute()
+
+const DEMO_BOUNDS = {
+  north: 14.010,
+  south: 13.990,
+  west: 108.480,
+  east: 108.510,
+}
 
 interface FieldPipe {
   id: string
@@ -70,14 +77,14 @@ interface FieldDetail {
   id: string
   name: string
   area: number
-  polygon: Point[]
+  polygon: LatLng[]
   pipes: FieldPipe[]
 }
 
 const fields: FieldDetail[] = [
   {
     id: 'A', name: 'Field A', area: 0.84,
-    polygon: [{ x: 40, y: 30 }, { x: 260, y: 30 }, { x: 260, y: 170 }, { x: 40, y: 170 }],
+    polygon: pixelPolygonToLatLng([{ x: 40, y: 30 }, { x: 260, y: 30 }, { x: 260, y: 170 }, { x: 40, y: 170 }], DEMO_BOUNDS),
     pipes: [
       { id: 'A-1', name: 'Pipe A-1', lastLevel: 12, lastDate: 'today' },
       { id: 'A-2', name: 'Pipe A-2', lastLevel: 16, lastDate: 'yesterday' },
@@ -85,7 +92,7 @@ const fields: FieldDetail[] = [
   },
   {
     id: 'B', name: 'Field B', area: 0.52,
-    polygon: [{ x: 30, y: 20 }, { x: 270, y: 20 }, { x: 270, y: 180 }, { x: 30, y: 180 }],
+    polygon: pixelPolygonToLatLng([{ x: 30, y: 20 }, { x: 270, y: 20 }, { x: 270, y: 180 }, { x: 30, y: 180 }], DEMO_BOUNDS),
     pipes: [
       { id: 'B-1', name: 'Pipe B-1', lastLevel: 8, lastDate: '2 days ago' },
       { id: 'B-2', name: 'Pipe B-2', lastLevel: 10, lastDate: 'today' },
@@ -93,7 +100,7 @@ const fields: FieldDetail[] = [
   },
   {
     id: 'C', name: 'Field C', area: 1.23,
-    polygon: [{ x: 20, y: 25 }, { x: 280, y: 25 }, { x: 280, y: 175 }, { x: 20, y: 175 }],
+    polygon: pixelPolygonToLatLng([{ x: 20, y: 25 }, { x: 280, y: 25 }, { x: 280, y: 175 }, { x: 20, y: 175 }], DEMO_BOUNDS),
     pipes: [
       { id: 'C-1', name: 'Pipe C-1', lastLevel: 15, lastDate: 'today' },
       { id: 'C-2', name: 'Pipe C-2', lastLevel: 14, lastDate: '3 days ago' },
