@@ -34,11 +34,20 @@
 </template>
 
 <script setup lang="ts">
-import type { Point } from '~/types'
+import { pixelPolygonToLatLng, type LatLng } from '~/utils/mapCoords'
 
 definePageMeta({
   layout: 'default',
 })
+
+// Geographic bounding box for demo (Vietnam)
+// Replace with your real field coordinates in production
+const DEMO_BOUNDS = {
+  north: 14.010,
+  south: 13.990,
+  west: 108.480,
+  east: 108.510,
+}
 
 interface HomeField {
   id: string
@@ -46,14 +55,14 @@ interface HomeField {
   pipes: number
   area: number
   latestLevel: number
-  polygon: Point[]
+  polygon: LatLng[]
 }
 
 const fields = ref<HomeField[]>([
-  { id: 'A', name: 'Field A', pipes: 1, area: 0.8, latestLevel: 12, polygon: [{ x: 20, y: 20 }, { x: 100, y: 20 }, { x: 100, y: 80 }, { x: 20, y: 80 }] },
-  { id: 'B', name: 'Field B', pipes: 1, area: 1.2, latestLevel: 8,  polygon: [{ x: 120, y: 10 }, { x: 190, y: 10 }, { x: 190, y: 60 }, { x: 120, y: 60 }] },
-  { id: 'C', name: 'Field C', pipes: 1, area: 2.3, latestLevel: 15, polygon: [{ x: 90, y: 90 }, { x: 200, y: 90 }, { x: 200, y: 150 }, { x: 90, y: 150 }] },
-  { id: 'D', name: 'Field D', pipes: 1, area: 1.3, latestLevel: 6,  polygon: [{ x: 220, y: 40 }, { x: 285, y: 40 }, { x: 285, y: 130 }, { x: 220, y: 130 }] },
+  { id: 'A', name: 'Field A', pipes: 1, area: 0.8, latestLevel: 12, polygon: pixelPolygonToLatLng([{ x: 20, y: 20 }, { x: 100, y: 20 }, { x: 100, y: 80 }, { x: 20, y: 80 }], DEMO_BOUNDS) },
+  { id: 'B', name: 'Field B', pipes: 1, area: 1.2, latestLevel: 8,  polygon: pixelPolygonToLatLng([{ x: 120, y: 10 }, { x: 190, y: 10 }, { x: 190, y: 60 }, { x: 120, y: 60 }], DEMO_BOUNDS) },
+  { id: 'C', name: 'Field C', pipes: 1, area: 2.3, latestLevel: 15, polygon: pixelPolygonToLatLng([{ x: 90, y: 90 }, { x: 200, y: 90 }, { x: 200, y: 150 }, { x: 90, y: 150 }], DEMO_BOUNDS) },
+  { id: 'D', name: 'Field D', pipes: 1, area: 1.3, latestLevel: 6,  polygon: pixelPolygonToLatLng([{ x: 220, y: 40 }, { x: 285, y: 40 }, { x: 285, y: 130 }, { x: 220, y: 130 }], DEMO_BOUNDS) },
 ])
 
 function onFieldTap(id: string) {

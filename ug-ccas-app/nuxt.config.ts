@@ -8,6 +8,12 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
   ],
 
+  runtimeConfig: {
+    public: {
+      googleMapsApiKey: '',
+    },
+  },
+
   css: ['~/assets/css/main.css'],
 
   ui: {
