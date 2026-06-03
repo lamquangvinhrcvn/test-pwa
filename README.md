@@ -6,40 +6,40 @@
 
 ---
 
-## Cài đặt & Khởi động
+## Installation & Getting Started
 
-### Yêu cầu
+### Requirements
 
 - Docker + Docker Compose
-- Node.js 22 (trong container)
-- pnpm 9.x+ (trong container, qua corepack)
+- Node.js 22 (inside container)
+- pnpm 9.x+ (inside container, via corepack)
 
-### Lần đầu setup
+### First-time setup
 
 ```bash
 # 1. Build + start container
 docker compose up -d --build
 
-# 2. Exec vào container
+# 2. Exec into container
 docker compose exec nuxt bash
 
-# 3. Trong container: cài deps
+# 3. Inside container: install deps
 pnpm install
 
-# 4. Chạy dev server
+# 4. Run dev server
 pnpm dev
 ```
 
-Mở trình duyệt: **http://localhost:59000**
+Open browser: **http://localhost:59000**
 
-### Workflow hàng ngày
+### Daily workflow
 
 ```bash
 # Start container + dev server
 docker compose up -d
 docker compose exec nuxt pnpm dev
 
-# Hoặc exec vào rồi chạy
+# Or exec into container then run
 docker compose exec nuxt bash
 pnpm dev
 
@@ -49,68 +49,68 @@ docker compose down
 
 ---
 
-## Test PWA
+## Testing PWA
 
-### Dev mode (nhanh, SW bật)
+### Dev mode (fast, SW enabled)
 
 ```bash
 docker compose exec nuxt pnpm dev
 # → http://localhost:59000
-# → Mở Chrome DevTools → Application → Service Workers
-# → devOptions.enabled = true → SW chạy trong dev
+# → Open Chrome DevTools → Application → Service Workers
+# → devOptions.enabled = true → SW runs in dev
 ```
 
-Trang hiển thị debug panel với 6 chỉ số:
-| Chỉ số | Ý nghĩa |
+The page displays a debug panel with 6 indicators:
+| Indicator | Meaning |
 |---|---|
-| Kết nối | Online / Offline |
-| Service Worker | active / chưa đăng ký / đang cài |
-| Standalone | Đã mở ở chế độ PWA standalone chưa |
-| Cài đặt được | Browser đã fire `beforeinstallprompt` |
-| Đã cài PWA | App đã được install qua manifest |
-| Offline Ready | Cache lần đầu hoàn tất |
+| Connection | Online / Offline |
+| Service Worker | active / not registered / installing |
+| Standalone | Whether opened in PWA standalone mode |
+| Installable | Browser has fired `beforeinstallprompt` |
+| PWA Installed | App has been installed via manifest |
+| Offline Ready | Initial cache completed |
 
-### Production mode (test PWA đầy đủ)
+### Production mode (full PWA test)
 
 ```bash
-# Build + preview (SW hoạt động chuẩn)
-# Container chạy port 3000, host map 59000 → 3000
+# Build + preview (SW operates in standard mode)
+# Container runs port 3000, host maps 59000 → 3000
 docker compose exec nuxt pnpm build
 docker compose exec nuxt pnpm preview
 # → http://localhost:59000
 ```
 
-> **Quan trọng**: Install prompt (`beforeinstallprompt`) chỉ fire khi:
-> - Site chạy qua **HTTPS** hoặc **localhost**
-> - Có **user engagement** (click, scroll vài lần)
-> - Manifest hợp lệ + có icon PNG trong `public/pwa-icons/`
-> - User chưa từng cài app này trước đó
+> **Important**: Install prompt (`beforeinstallprompt`) only fires when:
+> - Site runs via **HTTPS** or **localhost**
+> - Has **user engagement** (a few clicks, scrolls)
+> - Valid manifest + PNG icons in `public/pwa-icons/`
+> - User hasn't previously installed this app
 >
-> Nếu không thấy nút "Cài đặt lên màn hình chính", thử:
-> 1. Mở Chrome DevTools → Application → Manifest → kiểm tra manifest có lỗi không
-> 2. Application → Service Workers → check SW có status "activated"
-> 3. Click vài lần trên trang để tạo engagement
-> 4. Vào `chrome://serviceworker-internals` → tìm scope → Unregister → reload lại trang
-> 5. Dùng chế độ Incognito (không cache SW cũ)
+> If you don't see the "Install to home screen" button, try:
+> 1. Open Chrome DevTools → Application → Manifest → check for manifest errors
+> 2. Application → Service Workers → check SW status is "activated"
+> 3. Click around the page a few times to generate engagement
+> 4. Go to `chrome://serviceworker-internals` → find scope → Unregister → reload page
+> 5. Use Incognito mode (no cached old SW)
 
 ### Lighthouse Audit
 
 ```bash
-# Trên host
+# On host
 npx lighthouse http://localhost:59000 --view --preset=desktop
 ```
 
 ---
 
-## Cấu trúc project
+## Project Structure
 
 ```
 ├── .docker/node/Dockerfile       # Node 22 + pnpm
-├── docker-compose.yml            # Port 59000, mount volume
+├── docker-compose.yml            # Port 59000, volume mount
 ├── .gitignore
-├── .README.md                    # File này
-├── .claude/skills/vite-pwa-nuxt/ # Skill PWA cho Claude Code
-├── ug-ccas-app/                  # Source Nuxt (mount vào /app)
+├── README.md                     # This file
+├── .claude/skills/vite-pwa-nuxt/ # PWA skill for Claude Code
+├── ug-ccas-app/                  # Nuxt source (mounted to /app)
 │   ├── nuxt.config.ts            # PWA + Nuxt UI config
 │   ├── package.json
 │   ├── app/
@@ -123,30 +123,30 @@ npx lighthouse http://localhost:59000 --view --preset=desktop
 
 ---
 
-## Tạo PWA Icons
+## Generating PWA Icons
 
 ```bash
-# 1. Đặt file icon.svg (≥512×512) vào public/pwa-icons/
-# 2. Trong container:
+# 1. Place icon.svg file (≥512×512) in public/pwa-icons/
+# 2. Inside container:
 docker compose exec nuxt bash
 pnpm dlx @vite-pwa/assets-generator --preset minimal public/pwa-icons/icon.svg
 ```
 
 ---
 
-## Lệnh hữu ích
+## Useful Commands
 
 ```bash
-# Xem log container
+# View container logs
 docker compose logs -f nuxt
 
 # Restart container
 docker compose restart
 
-# Xoá sạch (kể cả volume cache pnpm)
+# Clean everything (including pnpm cache volume)
 docker compose down -v
 
-# Cài thêm package
+# Install additional packages
 docker compose exec nuxt pnpm add <package-name>
 ```
 
@@ -154,11 +154,11 @@ docker compose exec nuxt pnpm add <package-name>
 
 ## Troubleshooting
 
-| Vấn đề | Cách xử lý |
+| Issue | Solution |
 |---|---|
-| Trang trắng / 500 error | Kiểm tra `docker compose logs nuxt` — thường do SSR error (dùng `import.meta.client` hoặc `onMounted` cho browser API) |
-| Hot-reload không chạy | Đảm bảo `CHOKIDAR_USEPOLLING=true` + `vite.server.watch.usePolling: true` |
-| Port 59000 bị chiếm | Đổi port trong `docker-compose.yml` + `PORT` env |
-| File sinh ra bị `root:root` | Export `USER_UID=$(id -u)` và `USER_GID=$(id -g)` trước `docker compose build` |
-| SW không update | Hard reload (Ctrl+Shift+R), clear SW ở DevTools → Application |
-| Install prompt không hiện | Xem phần "Test PWA" phía trên, kiểm tra manifest + SW + engagement |
+| Blank page / 500 error | Check `docker compose logs nuxt` — usually due to SSR error (use `import.meta.client` or `onMounted` for browser APIs) |
+| Hot-reload not working | Ensure `CHOKIDAR_USEPOLLING=true` + `vite.server.watch.usePolling: true` |
+| Port 59000 already in use | Change port in `docker-compose.yml` + `PORT` env |
+| Generated files owned by `root:root` | Export `USER_UID=$(id -u)` and `USER_GID=$(id -g)` before `docker compose build` |
+| SW not updating | Hard reload (Ctrl+Shift+R), clear SW in DevTools → Application |
+| Install prompt not showing | See "Testing PWA" section above, check manifest + SW + engagement |

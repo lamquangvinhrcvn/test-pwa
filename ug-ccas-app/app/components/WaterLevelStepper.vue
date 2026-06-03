@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-blue-100 rounded-xl p-3 flex items-center justify-between gap-4">
+  <div class="bg-blue-100 rounded-xl p-3 flex items-center justify-between gap-4 border-2 border-blue-400">
     <UButton
       icon="i-lucide-minus"
       color="neutral"
