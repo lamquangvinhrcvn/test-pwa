@@ -37,10 +37,10 @@ Open browser: **http://localhost:59000**
 ```bash
 # Start container + dev server
 docker compose up -d
-docker compose exec nuxt pnpm dev
+docker compose exec pwa-fager-ug pnpm dev
 
 # Or exec into container then run
-docker compose exec nuxt bash
+docker compose exec pwa-fager-ug bash
 pnpm dev
 
 # Stop container
@@ -54,7 +54,7 @@ docker compose down
 ### Dev mode (fast, SW enabled)
 
 ```bash
-docker compose exec nuxt pnpm dev
+docker compose exec pwa-fager-ug pnpm dev
 # → http://localhost:59000
 # → Open Chrome DevTools → Application → Service Workers
 # → devOptions.enabled = true → SW runs in dev
@@ -75,8 +75,8 @@ The page displays a debug panel with 6 indicators:
 ```bash
 # Build + preview (SW operates in standard mode)
 # Container runs port 3000, host maps 59000 → 3000
-docker compose exec nuxt pnpm build
-docker compose exec nuxt pnpm preview
+docker compose exec pwa-fager-ug pnpm build
+docker compose exec pwa-fager-ug pnpm preview
 # → http://localhost:59000
 ```
 
@@ -109,7 +109,6 @@ npx lighthouse http://localhost:59000 --view --preset=desktop
 ├── docker-compose.yml            # Port 59000, volume mount
 ├── .gitignore
 ├── README.md                     # This file
-├── .claude/skills/vite-pwa-nuxt/ # PWA skill for Claude Code
 ├── ug-ccas-app/                  # Nuxt source (mounted to /app)
 │   ├── nuxt.config.ts            # PWA + Nuxt UI config
 │   ├── package.json
@@ -128,7 +127,7 @@ npx lighthouse http://localhost:59000 --view --preset=desktop
 ```bash
 # 1. Place icon.svg file (≥512×512) in public/pwa-icons/
 # 2. Inside container:
-docker compose exec nuxt bash
+docker compose exec pwa-fager-ug bash
 pnpm dlx @vite-pwa/assets-generator --preset minimal public/pwa-icons/icon.svg
 ```
 
@@ -138,7 +137,7 @@ pnpm dlx @vite-pwa/assets-generator --preset minimal public/pwa-icons/icon.svg
 
 ```bash
 # View container logs
-docker compose logs -f nuxt
+docker compose logs -f pwa-fager-ug
 
 # Restart container
 docker compose restart
